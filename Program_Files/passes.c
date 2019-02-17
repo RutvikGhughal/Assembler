@@ -5,13 +5,15 @@
 # include "passes.h"
 # include "conversions.h"
 
-void firstPass()
+
+//reads input.asm and generates symTable.txt and opTable.txt
+void firstPass()						
 {
-	char availInstr[12][5] = {"MOV", "ADD", "SUB", "MUL", "CMP", 
+	char availInstr[12][5] = {"MOV", "ADD", "SUB", "MUL", "CMP", 		//stores all possible insturctions
 	"AND", "OR", "NOT", "JMP", "LOOP", "HLT", "JNZ"
 	};
-	int memoryOfInstr[12] = {4, 4, 4, 2, 4, 2, 2, 1, 2, 4, 0, 2};
-	int isDuplicate[12] = {0};
+	int memoryOfInstr[12] = {4, 4, 4, 2, 4, 2, 2, 1, 2, 4, 0, 2};		//Memory occupied by each instruction
+												
 
 	FILE *inputPointer = fopen("input.asm", "r") ; 
 	if (inputPointer == NULL)
@@ -23,46 +25,45 @@ void firstPass()
 	FILE *opTable = fopen("opTable.txt", "w+");
 
 
-	char instr[5];
-	int deciAddr = 0;
-	char isLabel;
+	char instr[5];														//Stores instructions word by word
+	int deciAddr = 0;													//Stores decimal address of current instruction
+	int isDuplicate[12] = {0};											//To avoid putting duplicates in opTable
 	while( fscanf(inputPointer, "%s", instr) == 1 )								//first pass
 	{
 
-		if ( (strcasecmp(instr, "START") == 0) || (strcasecmp(instr, "END") == 0))
+		if ( (strcasecmp(instr, "START") == 0) || (strcasecmp(instr, "END") == 0))			//ignore START and END
 		{
 			continue;
 		}
 
-		int index;
+		int index;												//stores the index of instruction found in availInstr[]
 		for (index = 0; index < 12; index++)
 		{
 			if (strcasecmp(availInstr[index], instr) == 0)
 				break;
 		}
 
-		int number;
 		char isLabel;
 		char labeltype;
 		if (index == 12)									//Then the string must be a label
 		{
-			isLabel = '1';
-			labeltype = '1';
+			isLabel = '1';									//erase previously stored
+			labeltype = '1';								//erase previously stored
 			sscanf(instr, "%c%*d%c", &isLabel, &labeltype);
 
 			if (isLabel == 'L')
 			{
-				if (labeltype == ':')
+				if (labeltype == ':')						//if of form L1:
 				{	
 					fprintf(symTable, "%s\t\t%s\n", instr, decToHexa(deciAddr));	
 					continue;
 				}
 				else
-					deciAddr += 1;
+					deciAddr += 1;							//if of form L1
 			}
 		}
 
-		else
+		else												//If it is an instruction word (store in opTable)
 		{	
 			deciAddr += memoryOfInstr[index];
 			if(!isDuplicate[index])
@@ -84,18 +85,19 @@ void firstPass()
 
 void secondPass()
 {
-	char availInstr[12][5] = {"MOV", "ADD", "SUB", "MUL", "CMP", 
+	char availInstr[12][5] = {"MOV", "ADD", "SUB", "MUL", "CMP", 				//stores all possible insturctions
 	"AND", "OR", "NOT", "JMP", "LOOP", "HLT", "JNZ"
 	};
-	int memoryOfInstr[12] = {4, 4, 4, 2, 4, 2, 2, 1, 2, 4, 0, 2};
+	int memoryOfInstr[12] = {4, 4, 4, 2, 4, 2, 2, 1, 2, 4, 0, 2};				//Memory occupied by each instruction
 
 
-	FILE *inputPointer = fopen("input.asm", "r") ; 
+	FILE *inputPointer = fopen("input.asm", "r"); 
 	if (inputPointer == NULL)
 	{
 		printf("File \"input.asm\" doesn't exist\n");	
 		return ;
 	}
+																			//Open all needed files
 	FILE *symTable = fopen("symTable.txt", "r");
 	FILE *opTable = fopen("opTable.txt", "r");
 	FILE *output = fopen("output.o", "w");
@@ -103,11 +105,11 @@ void secondPass()
 
 
 	char instr[5];
-	int deciAddr = 0;
-	char wordType;
-	char isFinished;
-	int a0,a1,a2,a3;
-	char sym[5];																//Reads contents of symbol tabel
+	int deciAddr = 0;					
+	char wordType;						//used to see if instr is a label or a register
+	char isFinished;					//used to store ',' which indicates line not finished
+	char a0,a1,a2,a3;					//Used to store addresses word-by-word															
+	char sym[5];						//Reads contents of symbol table
 	while( fscanf(inputPointer, "%s", instr) == 1 )								//Second Pass
 	{
 
@@ -138,34 +140,35 @@ void secondPass()
 			sscanf(instr, "%c%d%c", &isLabel, &number, &labeltype);
 			if (isLabel == 'L')
 			{
-				if (labeltype == ':')
+				if (labeltype == ':')			//ignore if label identifier
 					continue;
-				else 
+				else 							//when L1 is where you go to	
 				{	
-					while( fscanf(symTable, "%s", sym) == 1 )
+					while( fscanf(symTable, "%s", sym) == 1 )		//Search from symbol table
 					{
-						sscanf(sym, "%*c%d%*c", &symNumber);
-						if (number == symNumber)
+						sscanf(sym, "%*c%d%*c", &symNumber);		//get label number of that symbol in table
+						if (number == symNumber)					//if we get that label
 						{
-							fscanf(symTable, "%s", sym);
-							sscanf(sym, " %1d%1d%1d%1d", &a3, &a2, &a1, &a0);
-							fprintf(output, "%s%s %s%s\n", binary(a3), binary(a2), binary(a1), binary(a0));
+							fscanf(symTable, "%s", sym);			//get next stored word(which is the required address)
+																	//output in the required format
+							sscanf(sym, " %c%c%c%c", &a3, &a2, &a1, &a0);
+							fprintf(output, "%s%s %s%s\n", hexaToBinary(a3), hexaToBinary(a2), hexaToBinary(a1), hexaToBinary(a0));
 							break;
 						}
 
 					}
 					
-					deciAddr += 1;
+					deciAddr += 1;									//memory label takes
 					continue;
 				}
 			
 			}
 
 			sscanf(instr, "%c%d%c", &wordType, &number,&isFinished);
-			if (wordType == 'R')
+			if (wordType == 'R')									//if it's a register
 			{
 				fprintf(output, "%s  ", decToBinary(number));
-				if (isFinished != ',')
+				if (isFinished != ',')								//if not followed by ',' print newline
 				{
 					fprintf(output, "\n");
 				}
@@ -173,28 +176,30 @@ void secondPass()
 				continue;
 			}
 
-			sscanf(instr, " %1d%1d%1d%1d%c", &a3, &a2, &a1, &a0, &wordType);
+			sscanf(instr, " %c%c%c%c%c", &a3, &a2, &a1, &a0, &wordType);  // if the word is a hexadecimal number
 			if (wordType == 'H')
 			{
-				fprintf(output, "%s%s  %s%s\n", binary(a3), binary(a2), binary(a1), binary(a0));
+				fprintf(output, "%s%s  %s%s\n", hexaToBinary(a3), hexaToBinary(a2), hexaToBinary(a1), hexaToBinary(a0));
 			}
 
 		}
-		else if (strcasecmp(instr, "LOOP") == 0)
+		else if (strcasecmp(instr, "LOOP") == 0)			//if "LOOP", do "SUB R31, 0001H" and JNZ 
 		{
-			fprintf(output, "%s\t\t0010  11111  00000000  00000001\n",decToHexa(deciAddr));
+			fprintf(output, "%s\t\t0010  11111  00000000  00000001\n",decToHexa(deciAddr));		//SUB R31, 0001H
 			deciAddr += memoryOfInstr[2];
-			fprintf(output, "%s\t\t1011  ",decToHexa(deciAddr));
+			fprintf(output, "%s\t\t1011  ",decToHexa(deciAddr));							//JNZ 
 			deciAddr += memoryOfInstr[11];
 			
 			continue;
 		}
 		else
-		{		
-			fprintf(output, "%4s\t\t%s  ",decToHexa(deciAddr), binary(index));
+		{	
+			//if instr is instruction word print address and instr
+			fprintf(output, "%4s\t\t%s  ",decToHexa(deciAddr), binary(index));	
 			deciAddr += memoryOfInstr[index];
 
-			if (strcasecmp(instr, "MUL") == 0)
+			//if the instruction is MUL add R1 to output
+			if (strcasecmp(instr, "MUL") == 0)		//MUL RN == MUL R1, RN
 			{
 				fprintf(output, "%s  ",decToBinary(1));
 			}

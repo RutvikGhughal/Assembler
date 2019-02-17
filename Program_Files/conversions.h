@@ -4,5 +4,6 @@
 char * binary(int deciNum);
 char * decToHexa(int deciNum);
 char * decToBinary(int n);
+char * hexaToBinary(char symbol);
 
 #endif

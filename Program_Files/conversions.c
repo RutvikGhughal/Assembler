@@ -4,15 +4,34 @@
 
 # include "conversions.h"
 
+//converts decimal digit to 4 digit binary
 char * binary(int deciNum)
 {
-
+	
 	char * binaryCode[16]= {"0000", "0001", "0010", "0011", "0100", "0101",
 	"0110", "0111", "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111"}; 
 
 	return binaryCode[deciNum];
 }
 
+//converts Hexadecimal character to 4 digit binary
+char * hexaToBinary(char symbol)
+{
+	char * binaryCode[16]= {"0000", "0001", "0010", "0011", "0100", "0101",
+	"0110", "0111", "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111"};
+
+	if ((symbol >= '0') && (symbol <= '9'))
+	{
+		symbol -= '0';
+	}
+	else
+		symbol -= 'A' - 10;
+
+	return binaryCode[symbol];
+
+}
+
+//converts decimal number to 4 digit hexadecimal
 char * decToHexa(int deciNum) 
 {
     char hexaDeciNum[5]; 
