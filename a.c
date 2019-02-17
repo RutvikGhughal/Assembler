@@ -18,11 +18,11 @@ int main()
 	char availInstr[12][5] = {"MOV", "ADD", "SUB", "MUL", "CMP", 
 	"AND", "OR", "NOT", "JMP", "LOOP", "HLT", "JNZ"
 	};
-	int memoryOfInstr[12] = {4, 4, 4, 2, 4, 2, 2, 1, 4, 4, 0, 4};
+	int memoryOfInstr[12] = {4, 4, 4, 2, 4, 2, 2, 1, 2, 4, 0, 2};
 	int isDuplicate[12] = {0};
 	
 	FILE *symTable = fopen("symTable.txt", "w+");
-	FILE *opTable = fopen("opTable.txt", "w");
+	FILE *opTable = fopen("opTable.txt", "w+");
 
 
 	char instr[5];
@@ -129,7 +129,7 @@ int main()
 						{
 							fscanf(symTable, "%s", sym);
 							sscanf(sym, " %1d%1d%1d%1d", &a3, &a2, &a1, &a0);
-							fprintf(output, "%s %s %s %s\n", binary(a3), binary(a2), binary(a1), binary(a0));
+							fprintf(output, "%s%s %s%s\n", binary(a3), binary(a2), binary(a1), binary(a0));
 							break;
 						}
 
@@ -165,6 +165,7 @@ int main()
 			fprintf(output, "%s\t\t0010  11111  00000000  00000001\n",decToHexa(deciAddr));
 			deciAddr += memoryOfInstr[2];
 			fprintf(output, "%s\t\t1011  ",decToHexa(deciAddr));
+			deciAddr += memoryOfInstr[11];
 			
 			continue;
 		}
