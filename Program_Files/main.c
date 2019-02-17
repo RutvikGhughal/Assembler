@@ -4,7 +4,6 @@
 
 # include "passes.h"
 
-
 int main()
 {
 	firstPass();

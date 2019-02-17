@@ -1,0 +1,4 @@
+HOW TO GENERATE "assembler" file:
+	> make all
+HOW TO GET OUTPUT (i.e get symTable.txt, opTable.txt and output.c from input.asm)
+	> ./assembler

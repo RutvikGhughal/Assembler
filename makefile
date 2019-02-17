@@ -4,7 +4,7 @@ BINDIR := $(TOPDIR)
 
 SOURCES := $(shell find $(SRCDIR) -name "*.c")
 
-CC := gcc 
+CC := gcc -g
 
 all: assembler
 

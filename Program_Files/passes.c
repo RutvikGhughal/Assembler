@@ -29,7 +29,7 @@ void firstPass()
 	while( fscanf(inputPointer, "%s", instr) == 1 )								//first pass
 	{
 
-		if ( (strcmp(instr, "START") == 0) || (strcmp(instr, "END") == 0))
+		if ( (strcasecmp(instr, "START") == 0) || (strcasecmp(instr, "END") == 0))
 		{
 			continue;
 		}
@@ -37,7 +37,7 @@ void firstPass()
 		int index;
 		for (index = 0; index < 12; index++)
 		{
-			if (strcmp(availInstr[index], instr) == 0)
+			if (strcasecmp(availInstr[index], instr) == 0)
 				break;
 		}
 
@@ -67,7 +67,10 @@ void firstPass()
 			deciAddr += memoryOfInstr[index];
 			if(!isDuplicate[index])
 			{
-				fprintf(opTable, "%s\t\t%s\n", instr, binary(index));
+				if (strcasecmp(instr, "LOOP") == 0)										//just to adjust tabs in opTable.txt
+					fprintf(opTable, "%s\t\t%s\n", instr, binary(index));
+				else
+					fprintf(opTable, "%s\t\t\t%s\n", instr, binary(index));
 				isDuplicate[index] = 1;
 			}
 		}
@@ -108,7 +111,7 @@ void secondPass()
 	while( fscanf(inputPointer, "%s", instr) == 1 )								//Second Pass
 	{
 
-		if ( (strcmp(instr, "START") == 0) || (strcmp(instr, "END") == 0))
+		if ( (strcasecmp(instr, "START") == 0) || (strcasecmp(instr, "END") == 0))
 		{
 			continue;
 		}
@@ -116,7 +119,7 @@ void secondPass()
 		int index;
 		for (index = 0; index < 12; index++)
 		{
-			if (strcmp(availInstr[index], instr) == 0)
+			if (strcasecmp(availInstr[index], instr) == 0)
 				break;
 		}
 
@@ -177,7 +180,7 @@ void secondPass()
 			}
 
 		}
-		else if (strcmp(instr, "LOOP") == 0)
+		else if (strcasecmp(instr, "LOOP") == 0)
 		{
 			fprintf(output, "%s\t\t0010  11111  00000000  00000001\n",decToHexa(deciAddr));
 			deciAddr += memoryOfInstr[2];
@@ -191,7 +194,7 @@ void secondPass()
 			fprintf(output, "%4s\t\t%s  ",decToHexa(deciAddr), binary(index));
 			deciAddr += memoryOfInstr[index];
 
-			if (strcmp(instr, "MUL") == 0)
+			if (strcasecmp(instr, "MUL") == 0)
 			{
 				fprintf(output, "%s  ",decToBinary(1));
 			}
